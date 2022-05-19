@@ -111,13 +111,13 @@
         <div>
           <button class="p-1 mr-4" @click="sidebarOpen = !sidebarOpen">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                 class="h-6 w-6">
+                 class="h-6 w-6 text-gray-900 dark:text-gray-400">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           </button>
         </div>
         <div>
-          <button id="theme-toggle" type="button"
+          <button v-on:click="changeTheme" id="theme-toggle" type="button"
                   class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
                  xmlns="http://www.w3.org/2000/svg">
@@ -140,6 +140,9 @@
 </template>
 
 <script>
+import SidebarService from "@/services/sidebar";
+const sidebarService = new SidebarService();
+
 export default {
   name: "SideBar",
   data() {
@@ -151,40 +154,21 @@ export default {
     this.changeTheme()
   },
   methods: {
-    setTheme: function(theme) {
-      document.documentElement.classList.add(theme);
-      localStorage.setItem('color-theme', theme);
-    },
-    setThemeAndRemove(theme, remove) {
-      document.documentElement.classList.remove(remove);
-      localStorage.setItem('color-theme', theme);
-    },
     changeTheme() {
-      var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-      var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+      let themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+      let themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      let colorTheme = localStorage.getItem('color-theme')
+
+      if (colorTheme === 'dark' || colorTheme === null) {
         themeToggleDarkIcon.classList.remove('hidden');
-        this.setTheme('dark')
+        themeToggleLightIcon.classList.add('hidden');
+        sidebarService.setThemeAndRemove('light', 'dark')
       } else {
         themeToggleLightIcon.classList.remove('hidden');
-        this.setTheme('light')
+        themeToggleDarkIcon.classList.add('hidden');
+        sidebarService.setTheme('dark')
       }
-
-      var themeToggleBtn = document.getElementById('theme-toggle');
-
-      themeToggleBtn.addEventListener('click', function () {
-        themeToggleDarkIcon.classList.toggle('hidden');
-        themeToggleLightIcon.classList.toggle('hidden');
-
-        // if set via local storage previously
-        if (localStorage.getItem('color-theme')) {
-          localStorage.getItem('color-theme') === 'light' ? this.setTheme('dark') : this.setTheme('light');
-        } else {
-          // if NOT set via local storage previously
-          document.documentElement.classList.contains('dark') ? this.setTheme('dark') : this.setThemeAndRemove('light', 'dark')
-        }
-      });
     }
   }
 }
